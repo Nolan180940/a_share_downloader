@@ -1,0 +1,15 @@
+data_dir: D:/Backtest/a_share_downloader/data
+start_date: "20150101"
+adjust: ""  # "qfq" 前复权, "hfq" 后复权, empty for raw
+# conservative defaults to avoid being rate-limited
+sleep_sec: 5.0
+retry_times: 5
+batch_pause_count: 200  # pause after every N stocks
+batch_pause_sec: 120
+output_format: parquet  # csv or parquet
+merge_to_one: false  # if true, also append all stocks to one big CSV (may be very large)
+source_priority:
+  - yahoo
+  - tushare
+  - akshare
+update_delay_days: 1  # only update through the last fully completed trading day

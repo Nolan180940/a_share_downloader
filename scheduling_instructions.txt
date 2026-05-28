@@ -1,0 +1,11 @@
+Windows Task Scheduler example:
+
+1. Open Task Scheduler -> Create Basic Task
+2. Name: AShare Daily Update
+3. Trigger: Daily at e.g. 18:30
+4. Action: Start a program
+   Program/script: C:\\Python39\\python.exe  (or path to your python)
+   Add arguments: D:\\Backtest\\a_share_downloader\\downloader.py --mode update --config D:\\Backtest\\a_share_downloader\\config.yaml
+   Start in: D:\\Backtest\\a_share_downloader
+
+Make sure your Python environment has dependencies installed and the machine is on at the scheduled time.
