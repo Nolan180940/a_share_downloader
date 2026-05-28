@@ -5,5 +5,3 @@ __pycache__/
 *.pyd
 results/
 results_*/
-data/
-*.parquet
