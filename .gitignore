@@ -4,4 +4,5 @@ __pycache__/
 *.pyo
 *.pyd
 results/
-results_*/
+!results_test/
+!results_test/**
