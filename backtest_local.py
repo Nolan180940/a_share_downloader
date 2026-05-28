@@ -202,14 +202,20 @@ class FundamentalsStore:
             df = pd.read_parquet(self.file_path)
         else:
             df = pd.read_csv(self.file_path)
+        # Normalize common column names from Tushare / other sources
         if "announce_date" in df.columns:
             df["announce_date"] = pd.to_datetime(df["announce_date"])
         elif "date" in df.columns:
             df["announce_date"] = pd.to_datetime(df["date"])
         elif "trade_date" in df.columns:
             df["announce_date"] = pd.to_datetime(df["trade_date"])
+
+        # Support Tushare's ts_code column -> normalized 6-digit `code`
         if "code" in df.columns:
             df["code"] = df["code"].astype(str).str.zfill(6)
+        elif "ts_code" in df.columns:
+            # ts_code like '000001.SZ' -> code '000001'
+            df["code"] = df["ts_code"].astype(str).str[:6]
         self._df = df
         return self._df
 
