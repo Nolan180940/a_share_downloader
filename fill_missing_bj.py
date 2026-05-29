@@ -25,6 +25,8 @@ import akshare as ak
 
 
 BJ_PREFIXES = ("83", "87", "88", "92")
+CANONICAL_COLUMNS = ["code", "name", "date", "open", "close", "high", "low", "volume"]
+CORE_COLUMNS = ["date", "open", "close", "high", "low", "volume"]
 
 
 def load_config(path: str) -> dict:
@@ -73,14 +75,20 @@ def standardize_tushare_df(df: pd.DataFrame, code: str, name: str | None = None)
     }
     df = df.rename(columns=rename_map)
     if "date" in df.columns:
-        df["date"] = pd.to_datetime(df["date"]).dt.date
-    if "volume" in df.columns:
-        df["volume"] = pd.to_numeric(df["volume"], errors="coerce")
+        df["date"] = pd.to_datetime(df["date"], errors="coerce").dt.date
+    for column in ["open", "close", "high", "low", "volume"]:
+        if column in df.columns:
+            df[column] = pd.to_numeric(df[column], errors="coerce")
     df["code"] = code
     if name:
         df["name"] = name
-    keep = [c for c in ["code", "name", "date", "open", "close", "high", "low", "volume", "amount"] if c in df.columns]
-    return df[keep].sort_values("date")
+    keep = [c for c in CANONICAL_COLUMNS if c in df.columns]
+    df = df[keep]
+    if "date" in df.columns:
+        df = df.dropna(subset=["date"])
+    if set(CORE_COLUMNS).issubset(df.columns):
+        df = df.dropna(subset=CORE_COLUMNS)
+    return df.sort_values("date")
 
 
 def fetch_tushare_bars(ts_code: str, start_date: str, end_date: str) -> pd.DataFrame:
@@ -147,6 +155,10 @@ def main() -> None:
                 skipped += 1
                 continue
             sdf = standardize_tushare_df(df, code, name=name)
+            if sdf.empty:
+                print(f"skip {code} {ts_code}: empty after normalization")
+                skipped += 1
+                continue
             write_parquet_atomic(out_path, sdf)
             print(f"saved {code} rows={len(sdf)}")
             done += 1
